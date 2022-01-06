@@ -1,6 +1,8 @@
 <template>
   <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 bg-gray-800">
-    <div class="text-4xl font-bold p-20 text-center text-gray-200">
+    <div
+      class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
+    >
       EOS Super Friends!
     </div>
     <div
