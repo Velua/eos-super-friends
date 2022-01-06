@@ -4,10 +4,10 @@
       EOS Super Friends!
     </div>
     <div
-      class="max-w-5xl mx-auto my-6 flex flex-col justify-center md:flex-row flex-wrap basis-0 shrink grow gap-10 "
+      class="max-w-7xl mx-auto my-6 flex flex-col justify-center md:flex-row flex-wrap basis-0 shrink grow gap-4"
     >
       <div
-        class="rounded-lg bg-gray-500 p-10 max-w-sm flex flex-col justify-center "
+        class="rounded-lg bg-gray-500 w-4/6 p-10 max-w-sm flex flex-col justify-center m-auto "
         v-for="member in members"
         :key="member.name"
       >
