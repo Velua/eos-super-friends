@@ -6,19 +6,29 @@
       EOS Super Friends!
     </div>
     <div
+      class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
+    >
+      Worth: {{ formattedValue }}
+    </div>
+    <div
+      class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
+    >
+      Profit: {{ profit }}
+    </div>
+    <div
       class="max-w-7xl mx-auto my-6 flex flex-col justify-center md:flex-row flex-wrap basis-0 shrink grow gap-4"
     >
       <div
-        class="rounded-lg bg-gray-500 w-4/6 p-10 max-w-sm flex flex-col justify-center m-auto "
         v-for="member in members"
         :key="member.name"
+        class="rounded-lg bg-gray-500 w-4/6 p-10 max-w-sm flex flex-col justify-center m-auto "
       >
         <div class="max-w-lg flex flex-col justify-center basis-0 shrink grow ">
           <img
             class="rounded-lg w-40 h-40 mx-auto"
             :src="member.picture"
             :alt="member.name"
-          />
+          >
           <h1 class="font-semibold text-gray-200 text-center mt-4 text-2xl">
             {{ member.name }}
           </h1>
@@ -29,44 +39,81 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, onMounted, ref } from 'vue'
+import axios from 'axios'
+
+
+var formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+})
+
 
 export default defineComponent({
   components: {},
   setup() {
     const members: { name: string; picture: string }[] = [
       {
-        name: "Aaron Cox",
-        picture: "Qmb7yzsVfEssigjHbcX46g4RPPgvEzjqiAxa1nmkm76APo"
+        name: 'Aaron Cox',
+        picture: 'Qmb7yzsVfEssigjHbcX46g4RPPgvEzjqiAxa1nmkm76APo',
       },
       {
-        name: "Brandon Lovejoy",
-        picture: "QmVpVRdr5U7XuWprRUhr4tDEjitxV1b7mf4Ui78ba81fkV"
+        name: 'Brandon Lovejoy',
+        picture: 'QmVpVRdr5U7XuWprRUhr4tDEjitxV1b7mf4Ui78ba81fkV',
       },
       {
-        name: "Chris Barnes",
-        picture: "QmWyawMvUQMf7FmaxpJyot5efmVFWC9gF8JVUcR9ovicwX"
+        name: 'Chris Barnes',
+        picture: 'QmWyawMvUQMf7FmaxpJyot5efmVFWC9gF8JVUcR9ovicwX',
       },
       {
-        name: "Randall Roland",
-        picture: "QmaXBFy6Xh3K7NM5BHJhzYXgTmbVzCgdpn7YeBiqhAsCQv"
+        name: 'Randall Roland',
+        picture: 'QmaXBFy6Xh3K7NM5BHJhzYXgTmbVzCgdpn7YeBiqhAsCQv',
       },
       {
-        name: "Jesse Jaffe",
-        picture: "QmSx7cT8WoPR9tyDJh5D4snjZcMYqiiXCCnKWYMJJpLs2Q"
+        name: 'Jesse Jaffe',
+        picture: 'QmSx7cT8WoPR9tyDJh5D4snjZcMYqiiXCCnKWYMJJpLs2Q',
       },
       {
-        name: "John Williamson",
-        picture: "QmWU7jyrFxQF5LfMrKyCdb4b1jt4fzDsk3w2KHJ2mvjn5F"
-      }
+        name: 'John Williamson',
+        picture: 'QmWU7jyrFxQF5LfMrKyCdb4b1jt4fzDsk3w2KHJ2mvjn5F',
+      },
     ].map(x => ({
       ...x,
-      picture: `https://ipfs.orelo.software/ipfs/${x.picture}`
-    }));
+      picture: `https://ipfs.orelo.software/ipfs/${x.picture}`,
+    }))
 
-    return { members };
+  const fetchUsdAudPrice = async() => {
+    const { data } = await axios.get<{ data:  { AUD: number  } }>('https://freecurrencyapi.net/api/v2/latest?base_currency=USD&apikey=0eba3020-7e39-11ec-aef6-1f97d7d5f210')
+    return data.data.AUD
   }
-});
+
+  const fetchBinancePrice = async() => {
+    const { data } = await axios.get<{ symbol: string, price: string }>('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+    return Number(data.price)
+  }
+
+
+  const btcHolding = 0.13640358
+  const invested = ref(7000)
+  const audValue = ref(0)
+  const profit = computed(() => formatter.format(audValue.value - invested.value))
+
+  const formattedValue = computed(() => formatter.format(audValue.value))
+
+  const fetchData = async() => {
+    const [usdAud, btcPrice] = await Promise.all([fetchUsdAudPrice(), fetchBinancePrice()])
+
+    const usdWorth = btcHolding * btcPrice
+    audValue.value = usdWorth * usdAud
+  }
+
+    onMounted(() => {
+      fetchData()
+    }) 
+
+    return { members, profit,  formattedValue }
+  },
+})
 </script>
 
 <style>
