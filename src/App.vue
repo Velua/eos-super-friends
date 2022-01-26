@@ -11,6 +11,7 @@
       Worth: {{ formattedValue }}
     </div>
     <div
+      v-if="profit"
       :class="`text-4xl font-bold tracking-wide p-20 text-center text-gray-200 ${inProfit ? 'text-green-500' : 'text-red-500'}`"
     >
       Profit: {{ profit }}
