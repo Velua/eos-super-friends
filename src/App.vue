@@ -11,7 +11,7 @@
       Worth: {{ formattedValue }}
     </div>
     <div
-      class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
+      :class="`text-4xl font-bold tracking-wide p-20 text-center text-gray-200 ${inProfit ? 'text-green-500' : 'text-red-500'}`"
     >
       Profit: {{ profit }}
     </div>
@@ -41,7 +41,8 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue'
 import axios from 'axios'
-
+import {  combineLatest,  map, of, shareReplay, switchMap, tap, timer } from 'rxjs'
+import {  useObservable } from '@vueuse/rxjs'
 
 var formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -88,30 +89,51 @@ export default defineComponent({
   }
 
   const fetchBinancePrice = async() => {
+    console.count('binance')
     const { data } = await axios.get<{ symbol: string, price: string }>('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
     return Number(data.price)
   }
 
 
   const btcHolding = 0.13640358
-  const invested = ref(7000)
-  const audValue = ref(0)
-  const profit = computed(() => formatter.format(audValue.value - invested.value))
 
-  const formattedValue = computed(() => formatter.format(audValue.value))
 
-  const fetchData = async() => {
-    const [usdAud, btcPrice] = await Promise.all([fetchUsdAudPrice(), fetchBinancePrice()])
+  const seconds$ = timer(0, 7000)
+  const minute$ = timer(0, 60000)
 
-    const usdWorth = btcHolding * btcPrice
-    audValue.value = usdWorth * usdAud
-  }
+  const usdAud$ = minute$.pipe(
+    switchMap(() => fetchUsdAudPrice()),
+  )
 
-    onMounted(() => {
-      fetchData()
-    }) 
+  const usdBtc$ = seconds$.pipe(
+    switchMap(() => fetchBinancePrice()),
+    shareReplay(1),
+  )
 
-    return { members, profit,  formattedValue }
+  const audValue$ = combineLatest([usdAud$, usdBtc$, of(btcHolding)]).pipe(
+    map(([usdAud, usdBtc, btcHolding]) => {
+      const usdWorth = usdBtc * btcHolding
+      return usdAud * usdWorth
+    }),
+  )
+
+  const profit$ = audValue$.pipe(
+    map(value => value - 7000 ),
+  )
+
+  const profit = useObservable(profit$.pipe(
+    map(formatter.format),
+  ))
+
+  const formattedValue = useObservable(audValue$.pipe(
+    map(formatter.format),
+  ))
+
+  const inProfit = useObservable(profit$.pipe(map(price => price > 0)))
+
+
+
+    return { members, profit,  formattedValue, inProfit }
   },
 })
 </script>
