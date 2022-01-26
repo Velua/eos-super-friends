@@ -41,7 +41,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue'
 import axios from 'axios'
-import {  combineLatest,  map, of, shareReplay, switchMap, tap, timer } from 'rxjs'
+import {  combineLatest,  map, of, shareReplay, startWith, switchMap, tap, timer } from 'rxjs'
 import {  useObservable } from '@vueuse/rxjs'
 
 var formatter = new Intl.NumberFormat('en-US', {
@@ -129,7 +129,7 @@ export default defineComponent({
     map(formatter.format),
   ))
 
-  const inProfit = useObservable(profit$.pipe(map(price => price > 0)))
+  const inProfit = useObservable(profit$.pipe(map(price => price > 0), startWith(false)))
 
 
 
