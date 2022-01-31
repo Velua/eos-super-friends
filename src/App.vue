@@ -144,9 +144,8 @@ export default defineComponent({
     )
 
     const audValue$ = combineLatest([usdAud$, usdWorth$]).pipe(
-      map(([usdAud, usdWorth]) => {
-        return usdAud * usdWorth
-      }),
+      map(([usdAud, usdWorth]) =>  usdAud * usdWorth,
+      ),
     )
 
     const profit$ = audValue$.pipe(map((value) => value - 7000))
