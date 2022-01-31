@@ -119,17 +119,10 @@ export default defineComponent({
       picture: `https://ipfs.orelo.software/ipfs/${x.picture}`,
     }))
 
-    const fetchUsdAudPrice = async () => {
-      const { data } = await axios.get<{ data: { AUD: number } }>(
-        'https://freecurrencyapi.net/api/v2/latest?base_currency=USD&apikey=0eba3020-7e39-11ec-aef6-1f97d7d5f210',
-      )
-      return data.data.AUD
-    }
 
-    const fetchBinancePrice = async () => {
-      console.count('binance')
+    const fetchBinancePrice = async (ticker: string) => {
       const { data } = await axios.get<{ symbol: string; price: string }>(
-        'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
+        `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`,
       )
       return Number(data.price)
     }
@@ -139,10 +132,10 @@ export default defineComponent({
     const seconds$ = timer(0, 7000)
     const minute$ = timer(0, 60000)
 
-    const usdAud$ = minute$.pipe(switchMap(() => fetchUsdAudPrice()), shareReplay(1))
+    const usdAud$ = minute$.pipe(switchMap(() => fetchBinancePrice('AUDUSDT')), shareReplay(1))
 
     const usdBtc$ = seconds$.pipe(
-      switchMap(() => fetchBinancePrice()),
+      switchMap(() => fetchBinancePrice('BTCUSDT')),
       shareReplay(1),
     )
 
