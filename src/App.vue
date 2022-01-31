@@ -144,7 +144,7 @@ export default defineComponent({
     )
 
     const audValue$ = combineLatest([usdAud$, usdWorth$]).pipe(
-      map(([usdAud, usdWorth]) =>  usdAud * usdWorth,
+      map(([usdAud, usdWorth]) => usdWorth / usdAud,
       ),
     )
 
