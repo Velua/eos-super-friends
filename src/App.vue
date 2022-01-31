@@ -130,6 +130,7 @@ export default defineComponent({
     const btcHolding = 0.13640358
 
     const seconds$ = timer(0, 7000)
+    //
     const minute$ = timer(0, 60000)
 
     const usdAud$ = minute$.pipe(switchMap(() => fetchBinancePrice('AUDUSDT')), shareReplay(1))
