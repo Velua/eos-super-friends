@@ -134,7 +134,7 @@ export default defineComponent({
     const seconds$ = timer(0, 7000)
     const minute$ = timer(0, 60000)
 
-    const usdAud$ = minute$.pipe(switchMap(() => fetchUsdAudPrice()))
+    const usdAud$ = minute$.pipe(switchMap(() => fetchUsdAudPrice()), shareReplay(1))
 
     const usdBtc$ = seconds$.pipe(
       switchMap(() => fetchBinancePrice()),
