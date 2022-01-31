@@ -8,7 +8,12 @@
     <div
       class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
     >
-      Worth: {{ formattedValue }}
+      Worth USD: {{ usdWorth }}
+    </div>
+    <div
+      class="text-4xl font-bold tracking-wide p-20 text-center text-gray-200"
+    >
+      Worth AUD: {{ formattedValue }}
     </div>
     <div
       v-if="profit"
@@ -16,7 +21,7 @@
         inProfit ? 'text-green-500' : 'text-red-500'
       }`"
     >
-      Profit: {{ profit }}
+      Profit AUD: {{ profit }}
     </div>
     <div
       class="
@@ -141,9 +146,12 @@ export default defineComponent({
       shareReplay(1),
     )
 
-    const audValue$ = combineLatest([usdAud$, usdBtc$, of(btcHolding)]).pipe(
-      map(([usdAud, usdBtc, btcHolding]) => {
-        const usdWorth = usdBtc * btcHolding
+    const usdWorth$ = combineLatest([usdBtc$, of(btcHolding)]).pipe(
+      map(([usdBtc, btcHolding]) => usdBtc * btcHolding),
+    )
+
+    const audValue$ = combineLatest([usdAud$, usdWorth$]).pipe(
+      map(([usdAud, usdWorth]) => {
         return usdAud * usdWorth
       }),
     )
@@ -151,6 +159,7 @@ export default defineComponent({
     const profit$ = audValue$.pipe(map((value) => value - 7000))
 
     const profit = useObservable(profit$.pipe(map(formatter.format)))
+    const usdWorth = useObservable(usdWorth$.pipe(map(formatter.format)))
 
     const formattedValue = useObservable(audValue$.pipe(map(formatter.format)))
 
@@ -161,7 +170,7 @@ export default defineComponent({
       ),
     )
 
-    return { members, profit, formattedValue, inProfit }
+    return { members, profit, formattedValue, inProfit, usdWorth }
   },
 })
 </script>
