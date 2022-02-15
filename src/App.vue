@@ -127,7 +127,8 @@ export default defineComponent({
       return Number(data.price)
     }
 
-    const btcHolding = 0.13640358
+    const audSpent = 5000
+    const btcHolding = 1.17785630
 
     const seconds$ = timer(0, 7000)
     //
@@ -136,7 +137,7 @@ export default defineComponent({
     const usdAud$ = minute$.pipe(switchMap(() => fetchBinancePrice('AUDUSDT')), shareReplay(1))
 
     const usdBtc$ = seconds$.pipe(
-      switchMap(() => fetchBinancePrice('BTCUSDT')),
+      switchMap(() => fetchBinancePrice('ETHUSDT')),
       shareReplay(1),
     )
 
@@ -149,7 +150,7 @@ export default defineComponent({
       ),
     )
 
-    const profit$ = audValue$.pipe(map((value) => value - 7000))
+    const profit$ = audValue$.pipe(map((value) => value - audSpent))
 
     const profit = useObservable(profit$.pipe(map(formatter.format)))
     const usdWorth = useObservable(usdWorth$.pipe(map(formatter.format)))
